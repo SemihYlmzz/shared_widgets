@@ -11,9 +11,11 @@ environment:
 dependencies:
   flutter:
     sdk: flutter
-  ### SHARED ONES
-  shared_constants:
-    path: ../shared_constants
+
+  shared_constants: 
+    git:
+      url: https://github.com/SemihYlmzz/shared_constants.git
+      ref: main
   
   ### PUB
   # View
