@@ -1,16 +1,27 @@
 import 'package:flutter/gestures.dart';
 import 'package:flutter/material.dart';
+import 'package:flutter_animate/flutter_animate.dart';
 import 'package:keyboard_detection/keyboard_detection.dart';
 
 class BaseScaffold extends StatelessWidget {
   const BaseScaffold({
     required this.body,
     super.key,
+
+    ///
+    // Additional
     this.safeArea = false,
     this.safeAreaBottom = false,
     this.safeAreaRight = false,
     this.safeAreaTop = false,
     this.safeAreaLeft = false,
+    this.unFocusOnScaffoldTap = true,
+    this.onScaffoldDoubleTap,
+    this.isKeyboardOpen,
+    this.initAnimationDelay,
+
+    ///
+    // Default Scaffold
     this.appBar,
     this.backgroundColor,
     this.bottomNavigationBar,
@@ -34,16 +45,12 @@ class BaseScaffold extends StatelessWidget {
     this.extendBodyBehindAppBar = false,
     this.persistentFooterAlignment = AlignmentDirectional.centerEnd,
     this.primary = true,
-    this.unFocusOnScaffoldTap = true,
-    this.onScaffoldDoubleTap,
-    this.isKeyboardOpen,
   });
   final bool safeArea;
   final bool safeAreaBottom;
   final bool safeAreaRight;
   final bool safeAreaTop;
   final bool safeAreaLeft;
-  final PreferredSizeWidget? appBar;
   final Color? backgroundColor;
   final Widget? bottomNavigationBar;
   final Widget? bottomSheet;
@@ -70,9 +77,11 @@ class BaseScaffold extends StatelessWidget {
   final bool primary;
   final Widget body;
   final Function(bool)? isKeyboardOpen;
+  final Duration? initAnimationDelay;
 
   @override
   Widget build(BuildContext context) {
+    bool isClosed = false;
     Size size = MediaQuery.sizeOf(context);
     return GestureDetector(
       onTap: FocusManager.instance.rootScope.focusedChild?.unfocus,
@@ -85,6 +94,7 @@ class BaseScaffold extends StatelessWidget {
           ),
           child: Scaffold(
             appBar: appBar,
+            backgroundColor: backgroundColor,
             bottomNavigationBar: bottomNavigationBar,
             bottomSheet: bottomSheet,
             drawer: drawer,
@@ -112,14 +122,40 @@ class BaseScaffold extends StatelessWidget {
               right: safeArea || safeAreaRight,
               top: safeArea || safeAreaTop,
               left: safeArea || safeAreaLeft,
-              child: SizedBox(
-                width: size.width,
-                child: body,
+              child: Animate(
+                effects: initAnimationDelay != null
+                    ? [
+                        const FadeEffect(),
+                        const ScaleEffect(
+                          begin: Offset(0.85, 0.85),
+                          curve: Curves.easeIn,
+                        ),
+                      ]
+                    : [],
+                delay: initAnimationDelay,
+                child: StatefulBuilder(
+                  builder: (context, setBuilderState) {
+                    isClosed = true;
+
+                    return SizedBox(
+                      width: size.width,
+                      child: body,
+                    );
+                  },
+                ),
               ),
+              // .animate(target: isClosed ? 1 : 0)
+              // .fadeOut(curve: Curves.easeIn)
+              // .scale(
+              // end: const Offset(0.85, 0.85),
+              // curve: Curves.easeIn,
+              // ),
             ),
           ),
         ),
       ),
     );
   }
+
+  final PreferredSizeWidget? appBar;
 }
